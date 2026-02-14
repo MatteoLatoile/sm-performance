@@ -1,0 +1,14 @@
+export const ADMIN_EMAIL = "smperformances.coaching@gmail.com";
+
+export function supabaseUrl() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  if (!url) throw new Error("Missing NEXT_PUBLIC_SUPABASE_URL in .env.local");
+  return url;
+}
+
+export function supabaseAnonKey() {
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!key)
+    throw new Error("Missing NEXT_PUBLIC_SUPABASE_ANON_KEY in .env.local");
+  return key;
+}

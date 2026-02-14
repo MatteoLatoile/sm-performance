@@ -133,7 +133,7 @@ export default function Hero() {
           </Link>
 
           <Link
-            href="#offres"
+            href="offres"
             className="inline-flex items-center justify-center rounded-full px-10 py-3 text-[15px] font-semibold transition"
             style={{
               background: "#00000000",
