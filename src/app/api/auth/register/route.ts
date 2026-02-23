@@ -1,5 +1,5 @@
-import { createClient } from "../../../../lib/supabase/server";
 import { NextResponse } from "next/server";
+import { createServerSupabase } from "../../../../lib/supabase/server";
 
 export async function POST(req: Request) {
   const body = await req.json().catch(() => null);
@@ -10,17 +10,20 @@ export async function POST(req: Request) {
 
   if (!firstName || firstName.trim().length < 2)
     return NextResponse.json({ error: "Prénom invalide" }, { status: 400 });
+
   if (!lastName || lastName.trim().length < 2)
     return NextResponse.json({ error: "Nom invalide" }, { status: 400 });
+
   if (!email || typeof email !== "string")
     return NextResponse.json({ error: "Email invalide" }, { status: 400 });
+
   if (!password || typeof password !== "string" || password.length < 8)
     return NextResponse.json(
       { error: "Mot de passe invalide" },
       { status: 400 },
     );
 
-  const supabase = await createClient();
+  const supabase = await createServerSupabase();
 
   const { error } = await supabase.auth.signUp({
     email,

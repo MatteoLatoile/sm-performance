@@ -61,3 +61,9 @@ export async function createServerSupabase() {
     },
   });
 }
+
+/**
+ * ✅ Alias si tu veux garder l'ancien import `createClient`
+ * (Optionnel)
+ */
+export const createClient = createServerSupabase;
