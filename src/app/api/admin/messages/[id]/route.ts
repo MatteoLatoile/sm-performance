@@ -1,11 +1,13 @@
-import { NextResponse } from "next/server";
-import { createServerSupabase } from "@/lib/supabase/server";
 import { createAdminSupabase, isAdminEmail } from "@/lib/supabase/admin";
+import { createServerSupabase } from "@/lib/supabase/server";
+import { NextResponse } from "next/server";
 
 export async function DELETE(
   _req: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
+  const { id } = await params;
+
   const supabase = await createServerSupabase();
   const { data } = await supabase.auth.getUser();
 
@@ -14,10 +16,7 @@ export async function DELETE(
   }
 
   const admin = createAdminSupabase();
-  const { error } = await admin
-    .from("contact_messages")
-    .delete()
-    .eq("id", params.id);
+  const { error } = await admin.from("contact_messages").delete().eq("id", id);
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
