@@ -18,7 +18,7 @@ export async function middleware(request: NextRequest) {
     },
   });
 
-  // ✅ Refresh session (cookies)
+  // refresh session cookie
   await supabase.auth.getUser();
 
   return response;

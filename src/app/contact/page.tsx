@@ -283,78 +283,18 @@ export default function ContactPage() {
           {/* Sidebar */}
           <div className="flex flex-col gap-4">
             <Card title="Infos" subtitle="Réponse rapide">
-              <InfoRow label="Téléphone" value="06 XX XX XX XX" />
-              <InfoRow label="Email" value="contact@smp-performance.fr" />
-              <InfoRow label="Zone" value="Paris / IDF" />
+              <InfoRow label="Téléphone" value="06 09 25 85 99" />
+              <InfoRow
+                label="Email"
+                value="smperformances.coaching@gmail.com"
+              />
+              <InfoRow label="Zone" value="Saint-Étienne" />
             </Card>
 
             <Card title="Horaires" subtitle="Sur réservation">
               <InfoRow label="Lun–Ven" value="07:00 — 22:00" />
               <InfoRow label="Sam" value="09:00 — 20:00" />
               <InfoRow label="Dim" value="09:00 — 14:00" />
-            </Card>
-
-            <Card title="Localisation" subtitle="Sans map (placeholder)">
-              <div
-                className="rounded-[16px] overflow-hidden"
-                style={{
-                  background: "#0D1014",
-                  border: "1px solid #232A36",
-                }}
-              >
-                <div
-                  style={{
-                    height: 160,
-                    background:
-                      "linear-gradient(135deg, rgba(212,175,55,0.12) 0%, rgba(17,21,28,1) 45%, rgba(0,0,0,0) 100%)",
-                    position: "relative",
-                  }}
-                >
-                  <div
-                    style={{
-                      position: "absolute",
-                      inset: 0,
-                      background:
-                        "radial-gradient(700px 240px at 25% 40%, rgba(212,175,55,0.18) 0%, rgba(0,0,0,0) 55%)",
-                      opacity: 1,
-                    }}
-                  />
-                  <div style={{ position: "absolute", left: 16, bottom: 16 }}>
-                    <div
-                      className="text-[12px] font-semibold"
-                      style={{ color: "#788291" }}
-                    >
-                      ADRESSE
-                    </div>
-                    <div
-                      className="mt-1 text-[14px] font-extrabold"
-                      style={{ color: "#F5F7FA" }}
-                    >
-                      À définir (placeholder)
-                    </div>
-                    <div
-                      className="mt-1 text-[12px]"
-                      style={{ color: "#A8B0BD" }}
-                    >
-                      Ajoute ici ton adresse + lien Google Maps plus tard.
-                    </div>
-                  </div>
-                </div>
-
-                <div className="p-4">
-                  <Link
-                    href="/reservations"
-                    className="inline-flex items-center justify-center rounded-full px-8 py-2 text-[13px] font-semibold transition"
-                    style={{
-                      background: "#11151C",
-                      color: "#E6C76A",
-                      border: "1px solid rgba(212,175,55,0.35)",
-                    }}
-                  >
-                    Réserver maintenant →
-                  </Link>
-                </div>
-              </div>
             </Card>
           </div>
         </div>

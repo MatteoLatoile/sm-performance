@@ -83,7 +83,6 @@ export default function Navbar() {
         setIsAdmin(isAdminEmail(u?.email));
         setAuthLoading(false);
 
-        // refresh SSR (si tu as des server components dépendants de session)
         router.refresh();
       },
     );
@@ -215,6 +214,15 @@ export default function Navbar() {
                       {user.email}
                     </div>
 
+                    {/* ✅ Mon espace (uniquement connecté) */}
+                    <Link
+                      href="/user"
+                      onClick={() => setProfileOpen(false)}
+                      className="block px-3 py-2 rounded-[14px] text-[13px] font-semibold text-[#F5F7FA] hover:bg-[#11151C] transition"
+                    >
+                      Mon espace
+                    </Link>
+
                     {isAdmin && !authLoading && (
                       <Link
                         href="/dashboard"
@@ -301,14 +309,35 @@ export default function Navbar() {
                       Connexion
                     </Link>
                   ) : (
-                    <button
-                      type="button"
-                      onClick={logout}
-                      disabled={loggingOut}
-                      className="w-full px-6 py-3 rounded-full text-[14px] font-semibold transition border border-[#232A36] text-[#F5F7FA] hover:border-[#D4AF37]"
-                    >
-                      {loggingOut ? "Déconnexion..." : "Déconnexion"}
-                    </button>
+                    <>
+                      {/* ✅ Mon espace (mobile, uniquement connecté) */}
+                      <Link
+                        href="/user"
+                        onClick={() => setMobileOpen(false)}
+                        className="w-full text-center px-6 py-3 rounded-full text-[14px] font-semibold transition border border-[#232A36] text-[#F5F7FA] hover:border-[#D4AF37] hover:bg-[#11151C]"
+                      >
+                        Mon espace
+                      </Link>
+
+                      {isAdmin && !authLoading && (
+                        <Link
+                          href="/dashboard"
+                          onClick={() => setMobileOpen(false)}
+                          className="w-full text-center px-6 py-3 rounded-full text-[14px] font-semibold transition border border-[#232A36] text-[#F5F7FA] hover:border-[#D4AF37] hover:bg-[#11151C]"
+                        >
+                          Dashboard
+                        </Link>
+                      )}
+
+                      <button
+                        type="button"
+                        onClick={logout}
+                        disabled={loggingOut}
+                        className="w-full px-6 py-3 rounded-full text-[14px] font-semibold transition border border-[#232A36] text-[#F5F7FA] hover:border-[#D4AF37]"
+                      >
+                        {loggingOut ? "Déconnexion..." : "Déconnexion"}
+                      </button>
+                    </>
                   )}
 
                   <Link

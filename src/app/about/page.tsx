@@ -11,7 +11,7 @@ export default function AboutPage() {
         minHeight: "calc(100vh - 86px)",
       }}
     >
-      {/* Top band */}
+      {/* bande du haut */}
       <div
         style={{
           background: "linear-gradient(180deg, #0B0D10 0%, #11151C 100%)",
@@ -75,10 +75,10 @@ export default function AboutPage() {
         </div>
       </div>
 
-      {/* Body */}
+      {/* body */}
       <div className="mx-auto max-w-6xl px-8 py-14">
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-6">
-          {/* Main content */}
+          {/* main content */}
           <div
             style={{
               background: "#0D1014",
@@ -112,7 +112,6 @@ export default function AboutPage() {
                 Une méthode sérieuse. Des résultats concrets.
               </h2>
 
-              {/* Ton texte optimisé sans changer l’intention */}
               <div
                 className="mt-6 space-y-4 text-[14px] md:text-[15px] leading-relaxed"
                 style={{ color: "#A8B0BD" }}
@@ -180,7 +179,7 @@ export default function AboutPage() {
                 </p>
               </div>
 
-              {/* CTA row */}
+              {/* cta ligne */}
               <div className="mt-8 flex flex-wrap items-center gap-3">
                 <Link
                   href="/reservations"
@@ -209,7 +208,7 @@ export default function AboutPage() {
             </div>
           </div>
 
-          {/* Sidebar cards */}
+          {/* sidebar*/}
           <div className="flex flex-col gap-4">
             <MiniCard
               title="Méthode"

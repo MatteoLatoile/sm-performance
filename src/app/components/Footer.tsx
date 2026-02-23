@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { FiMail, FiMapPin, FiPhone } from "react-icons/fi";
 
 export default function Footer() {
   return (
@@ -9,7 +10,6 @@ export default function Footer() {
         borderTop: "1px solid #232A36",
       }}
     >
-      {/* Top CTA band */}
       <div
         style={{
           background:
@@ -63,10 +63,8 @@ export default function Footer() {
         </div>
       </div>
 
-      {/* Main footer */}
       <div className="mx-auto max-w-6xl px-8 py-14">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
-          {/* Brand */}
           <div>
             <div className="flex items-center gap-3">
               <img
@@ -95,34 +93,8 @@ export default function Footer() {
               Coaching privé orienté résultats : technique, cardio, explosivité,
               discipline. Réservation simple, suivi sérieux.
             </div>
-
-            {/* Social (CSS hover, no JS) */}
-            <div className="mt-5 flex items-center gap-10">
-              <a
-                href="#"
-                className="text-[13px] transition hover:text-[#F5F7FA]"
-                style={{ color: "#A8B0BD" }}
-              >
-                Instagram
-              </a>
-              <a
-                href="#"
-                className="text-[13px] transition hover:text-[#F5F7FA]"
-                style={{ color: "#A8B0BD" }}
-              >
-                TikTok
-              </a>
-              <a
-                href="#"
-                className="text-[13px] transition hover:text-[#F5F7FA]"
-                style={{ color: "#A8B0BD" }}
-              >
-                YouTube
-              </a>
-            </div>
           </div>
 
-          {/* Navigation */}
           <div>
             <div
               className="text-[14px] font-semibold"
@@ -149,7 +121,6 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Offres */}
           <div>
             <div
               className="text-[14px] font-semibold"
@@ -193,7 +164,6 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Contact */}
           <div>
             <div
               className="text-[14px] font-semibold"
@@ -203,22 +173,39 @@ export default function Footer() {
             </div>
 
             <div className="mt-4 flex flex-col gap-3">
-              <div className="text-[13px]" style={{ color: "#A8B0BD" }}>
-                📍 Paris / IDF (à adapter)
+              <div
+                className="flex items-center gap-2 text-[13px]"
+                style={{ color: "#A8B0BD" }}
+              >
+                <FiMapPin
+                  size={16}
+                  style={{ color: "#D4AF37", flex: "0 0 auto" }}
+                />
+                <span>Saint-Étienne</span>
               </div>
+
               <a
-                className="text-[13px] transition hover:text-[#F5F7FA]"
+                className="flex items-center gap-2 text-[13px] transition hover:text-[#F5F7FA]"
                 style={{ color: "#A8B0BD" }}
-                href="tel:+33000000000"
+                href="tel:+33609258599"
               >
-                📞 +33 00 00 00 00 00
+                <FiPhone
+                  size={16}
+                  style={{ color: "#D4AF37", flex: "0 0 auto" }}
+                />
+                <span>06 09 25 85 99</span>
               </a>
+
               <a
-                className="text-[13px] transition hover:text-[#F5F7FA]"
+                className="flex items-center gap-2 text-[13px] transition hover:text-[#F5F7FA]"
                 style={{ color: "#A8B0BD" }}
-                href="mailto:contact@smperformance.fr"
+                href="mailto:smperformances.coaching@gmail.com"
               >
-                ✉️ contact@smperformance.fr
+                <FiMail
+                  size={16}
+                  style={{ color: "#D4AF37", flex: "0 0 auto" }}
+                />
+                <span>smperformances.coaching@gmail.com</span>
               </a>
             </div>
 
@@ -238,7 +225,6 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* Bottom legal */}
         <div
           className="mt-12 pt-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4"
           style={{ borderTop: "1px solid #1C222B" }}

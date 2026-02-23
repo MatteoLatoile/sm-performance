@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import AppLoader from "../app/components/AppLoader";
 import Footer from "../app/components/Footer";
 import Navbar from "../app/components/Navbar";
+import CookieConsent from "./components/CookieConsent";
 import "./globals.css";
 
 export const metadata = {
@@ -36,6 +37,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           <Navbar />
           <main style={{ width: "100%", background: "#11151C" }}>
             {children}
+            <CookieConsent />
           </main>
           <Footer />
         </AppLoader>

@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import Grappling from "../../../public/images/grappling.png";
 import KickBoxing from "../../../public/images/kickboxing.png";
@@ -117,11 +117,11 @@ export default function Reservations() {
   const [lastName, setLastName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
-  const [emailLocked, setEmailLocked] = useState(false); // ✅ NEW
+  const [emailLocked, setEmailLocked] = useState(false);
   const [note, setNote] = useState("");
   const [accept, setAccept] = useState(false);
 
-  // ✅ NEW: si connecté, on pré-remplit l’email et on le lock
+  // si connecté, pré-remplit l’email et lock
   useEffect(() => {
     let alive = true;
 
@@ -130,7 +130,7 @@ export default function Reservations() {
         const res = await fetch("/api/me", { cache: "no-store" });
         if (!alive) return;
 
-        if (res.status === 204) return; // pas connecté
+        if (res.status === 204) return;
 
         if (res.ok) {
           const json = (await res.json()) as { email?: string };
@@ -141,7 +141,7 @@ export default function Reservations() {
           }
         }
       } catch {
-        // si ça fail, on laisse l’email normal
+        // ignore
       }
     })();
 
@@ -174,6 +174,65 @@ export default function Reservations() {
     ],
     [],
   );
+
+  // ====== Step 1 mobile/tablet swipe carousel ======
+  const carouselRef = useRef<HTMLDivElement | null>(null);
+  const itemRefs = useRef<Array<HTMLButtonElement | null>>([]);
+  const rafRef = useRef<number | null>(null);
+  const [activeIdx, setActiveIdx] = useState(0);
+
+  const scrollToIndex = (idx: number, behavior: ScrollBehavior = "smooth") => {
+    const el = itemRefs.current[idx];
+    if (!el) return;
+    el.scrollIntoView({ behavior, inline: "center", block: "nearest" });
+    setActiveIdx(idx);
+  };
+
+  const onCarouselScroll = () => {
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    rafRef.current = requestAnimationFrame(() => {
+      const container = carouselRef.current;
+      if (!container) return;
+
+      const cRect = container.getBoundingClientRect();
+      const cCenter = cRect.left + cRect.width / 2;
+
+      let bestIdx = 0;
+      let bestDist = Number.POSITIVE_INFINITY;
+
+      for (let i = 0; i < itemRefs.current.length; i++) {
+        const el = itemRefs.current[i];
+        if (!el) continue;
+        const r = el.getBoundingClientRect();
+        const center = r.left + r.width / 2;
+        const dist = Math.abs(center - cCenter);
+        if (dist < bestDist) {
+          bestDist = dist;
+          bestIdx = i;
+        }
+      }
+
+      setActiveIdx(bestIdx);
+    });
+  };
+
+  // si discipline pré-sélectionnée (query param), on centre la carte correspondante
+  useEffect(() => {
+    if (!selected) return;
+    const idx = items.findIndex((it) => it.key === selected);
+    if (idx >= 0) {
+      setActiveIdx(idx);
+      // petit timeout pour laisser le DOM poser les refs (safe)
+      setTimeout(() => scrollToIndex(idx, "auto"), 0);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selected, items]);
+
+  useEffect(() => {
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    };
+  }, []);
 
   const stepLabel =
     step === 1
@@ -248,163 +307,429 @@ export default function Reservations() {
           )}
         </div>
 
+        {/* ✅ STEP 1 : desktop hover strips + mobile/tablet swipe */}
         {step === 1 && (
           <div className="mt-8">
-            <div
-              className="group flex w-full gap-3 md:gap-4 overflow-hidden justify-center"
-              style={{
-                height: 420,
-                borderRadius: 22,
-                background: "#0D1014",
-                padding: 14,
-              }}
-            >
-              {items.map((it) => {
-                const isSelected = selected === it.key;
+            {/* Desktop / hover */}
+            <div className="desktopStep1">
+              <div
+                className="group flex w-full gap-3 md:gap-4 overflow-hidden justify-center"
+                style={{
+                  height: 420,
+                  borderRadius: 22,
+                  background: "#0D1014",
+                  padding: 14,
+                }}
+              >
+                {items.map((it) => {
+                  const isSelected = selected === it.key;
 
-                return (
-                  <button
-                    key={it.key}
-                    type="button"
-                    onClick={() => setSelected(it.key)}
-                    className={[
-                      "strip relative overflow-hidden outline-none",
-                      "transition-[flex] duration-300 ease-out",
-                      "group-hover:opacity-70 hover:opacity-100",
-                      "focus-visible:opacity-100",
-                    ].join(" ")}
-                    style={{
-                      cursor: "pointer",
-                      boxShadow: isSelected
-                        ? "0 0 0 2px #D4AF37, 0 18px 60px rgba(0,0,0,0.45)"
-                        : "0 18px 60px rgba(0,0,0,0.35)",
-                    }}
-                    aria-pressed={isSelected}
-                  >
-                    <Image
-                      src={it.img}
-                      alt={it.key}
-                      fill
-                      className="object-cover stripImg"
-                      draggable={false}
-                    />
+                  return (
+                    <button
+                      key={it.key}
+                      type="button"
+                      onClick={() => setSelected(it.key)}
+                      className={[
+                        "strip relative overflow-hidden outline-none",
+                        "transition-[flex] duration-300 ease-out",
+                        "group-hover:opacity-70 hover:opacity-100",
+                        "focus-visible:opacity-100",
+                      ].join(" ")}
+                      style={{
+                        cursor: "pointer",
+                        boxShadow: isSelected
+                          ? "0 0 0 2px #D4AF37, 0 18px 60px rgba(0,0,0,0.45)"
+                          : "0 18px 60px rgba(0,0,0,0.35)",
+                      }}
+                      aria-pressed={isSelected}
+                    >
+                      <Image
+                        src={it.img}
+                        alt={it.key}
+                        fill
+                        className="object-cover stripImg"
+                        draggable={false}
+                      />
 
-                    <div className="stripOverlay" />
-                    <div className="stripGlow" />
+                      <div className="stripOverlay" />
+                      <div className="stripGlow" />
 
-                    <div className="absolute inset-0 flex items-end">
-                      <div className="w-full p-5 md:p-6 stripContent">
-                        <div
-                          className="font-extrabold leading-none"
-                          style={{
-                            color: "#F5F7FA",
-                            fontSize: "clamp(18px, 2.2vw, 34px)",
-                            letterSpacing: "-0.02em",
-                            textTransform: "uppercase",
-                            textShadow: "0 12px 40px rgba(0,0,0,0.65)",
-                          }}
-                        >
-                          {it.key}
-                        </div>
-
-                        <div className="mt-3 flex items-center gap-3">
-                          <span
-                            className="inline-flex items-center justify-center rounded-full px-6 py-2 text-[13px] font-semibold"
+                      <div className="absolute inset-0 flex items-end">
+                        <div className="w-full p-5 md:p-6 stripContent">
+                          <div
+                            className="font-extrabold leading-none"
                             style={{
-                              background: "#D4AF37",
-                              color: "#11151C",
-                              boxShadow: "0 10px 30px rgba(212,175,55,0.18)",
+                              color: "#F5F7FA",
+                              fontSize: "clamp(18px, 2.2vw, 34px)",
+                              letterSpacing: "-0.02em",
+                              textTransform: "uppercase",
+                              textShadow: "0 12px 40px rgba(0,0,0,0.65)",
                             }}
                           >
-                            Choisir
-                          </span>
+                            {it.key}
+                          </div>
 
-                          {isSelected && (
+                          <div className="mt-3 flex items-center gap-3">
                             <span
-                              className="text-[13px] font-semibold"
-                              style={{ color: "#E6C76A" }}
+                              className="inline-flex items-center justify-center rounded-full px-6 py-2 text-[13px] font-semibold"
+                              style={{
+                                background: "#D4AF37",
+                                color: "#11151C",
+                                boxShadow: "0 10px 30px rgba(212,175,55,0.18)",
+                              }}
                             >
-                              Sélectionné
+                              Choisir
                             </span>
-                          )}
+
+                            {isSelected && (
+                              <span
+                                className="text-[13px] font-semibold"
+                                style={{ color: "#E6C76A" }}
+                              >
+                                Sélectionné
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </button>
-                );
-              })}
-
-              <style jsx>{`
-                .strip {
-                  flex: 0 0 64px;
-                }
-                @media (min-width: 768px) {
-                  .strip {
-                    flex-basis: 78px;
-                  }
-                }
-                .strip:hover,
-                .strip:focus-visible {
-                  flex: 1 0 520px;
-                }
-
-                .stripImg {
-                  transform: scale(1.03);
-                  transition: transform 420ms cubic-bezier(0.22, 0.61, 0.36, 1);
-                }
-
-                .stripOverlay {
-                  position: absolute;
-                  inset: 0;
-                  background: linear-gradient(
-                    180deg,
-                    rgba(0, 0, 0, 0.72) 0%,
-                    rgba(0, 0, 0, 0.82) 60%,
-                    rgba(0, 0, 0, 0.9) 100%
+                    </button>
                   );
-                  opacity: 0.92;
-                  transition: opacity 260ms ease;
-                }
-
-                .stripGlow {
-                  position: absolute;
-                  inset: 0;
-                  background: radial-gradient(
-                    900px 500px at 35% 35%,
-                    rgba(212, 175, 55, 0.18) 0%,
-                    rgba(0, 0, 0, 0) 55%
-                  );
-                  opacity: 0;
-                  transition: opacity 280ms ease;
-                }
-
-                .stripContent {
-                  opacity: 0;
-                  transform: translate3d(0, 10px, 0);
-                  transition:
-                    opacity 240ms ease,
-                    transform 260ms ease;
-                }
-
-                .strip:hover .stripImg,
-                .strip:focus-visible .stripImg {
-                  transform: scale(1.1);
-                }
-                .strip:hover .stripOverlay,
-                .strip:focus-visible .stripOverlay {
-                  opacity: 0.55;
-                }
-                .strip:hover .stripGlow,
-                .strip:focus-visible .stripGlow {
-                  opacity: 1;
-                }
-                .strip:hover .stripContent,
-                .strip:focus-visible .stripContent {
-                  opacity: 1;
-                  transform: translate3d(0, 0, 0);
-                }
-              `}</style>
+                })}
+              </div>
             </div>
+
+            {/* Mobile/Tablet / swipe carousel */}
+            <div className="touchStep1">
+              <div
+                className="w-full"
+                style={{
+                  borderRadius: 22,
+                  background: "#0D1014",
+                  padding: 14,
+                }}
+              >
+                <div className="flex items-center justify-between gap-3 px-2 pb-2">
+                  <div
+                    className="text-[12px] font-semibold"
+                    style={{ color: "#788291" }}
+                  >
+                    Glisse → puis tape pour sélectionner
+                  </div>
+                  <div
+                    className="text-[12px] font-extrabold"
+                    style={{ color: "#E6C76A", opacity: selected ? 1 : 0.55 }}
+                  >
+                    {selected ?? "Aucune"}
+                  </div>
+                </div>
+
+                <div className="relative">
+                  <div
+                    ref={carouselRef}
+                    onScroll={onCarouselScroll}
+                    className="carousel"
+                    aria-label="Choix de discipline"
+                  >
+                    {items.map((it, idx) => {
+                      const isSelected = selected === it.key;
+                      const isActive = activeIdx === idx;
+
+                      return (
+                        <button
+                          key={it.key}
+                          ref={(el) => {
+                            itemRefs.current[idx] = el;
+                          }}
+                          type="button"
+                          onClick={() => {
+                            setSelected(it.key);
+                            scrollToIndex(idx);
+                          }}
+                          aria-pressed={isSelected}
+                          className="carouselCard relative overflow-hidden outline-none"
+                          style={{
+                            border: isSelected
+                              ? "2px solid #D4AF37"
+                              : isActive
+                                ? "1px solid rgba(212,175,55,0.45)"
+                                : "1px solid #232A36",
+                            boxShadow: isSelected
+                              ? "0 10px 30px rgba(212,175,55,0.18)"
+                              : "0 18px 60px rgba(0,0,0,0.30)",
+                          }}
+                        >
+                          <Image
+                            src={it.img}
+                            alt={it.key}
+                            fill
+                            className="object-cover carouselImg"
+                            draggable={false}
+                          />
+
+                          <div className="carouselOverlay" />
+                          <div className="carouselGlow" />
+
+                          {isSelected && (
+                            <div
+                              className="absolute right-3 top-3 rounded-full px-3 py-1 text-[12px] font-extrabold"
+                              style={{
+                                background: "rgba(212,175,55,0.16)",
+                                color: "#E6C76A",
+                                border: "1px solid rgba(212,175,55,0.35)",
+                              }}
+                            >
+                              Sélectionné
+                            </div>
+                          )}
+
+                          <div className="absolute inset-x-0 bottom-0 p-4">
+                            <div
+                              className="text-[15px] font-extrabold"
+                              style={{
+                                color: "#F5F7FA",
+                                textTransform: "uppercase",
+                                letterSpacing: "-0.02em",
+                                textShadow: "0 12px 40px rgba(0,0,0,0.65)",
+                              }}
+                            >
+                              {it.key}
+                            </div>
+
+                            <div className="mt-2 flex items-center justify-between gap-3">
+                              <span
+                                className="inline-flex items-center justify-center rounded-full px-4 py-2 text-[12px] font-semibold"
+                                style={{
+                                  background: isSelected
+                                    ? "#D4AF37"
+                                    : "rgba(17,21,28,0.65)",
+                                  color: isSelected ? "#11151C" : "#A8B0BD",
+                                  border: isSelected
+                                    ? "none"
+                                    : "1px solid #232A36",
+                                }}
+                              >
+                                {isSelected ? "OK" : "Choisir"}
+                              </span>
+
+                              <span
+                                className="text-[12px]"
+                                style={{ color: "#A8B0BD" }}
+                              >
+                                Swipe
+                              </span>
+                            </div>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <div className="edgeFade left" />
+                  <div className="edgeFade right" />
+                </div>
+
+                <div className="mt-4 flex items-center justify-center gap-2">
+                  {items.map((it, idx) => {
+                    const on = idx === activeIdx;
+                    return (
+                      <button
+                        key={it.key}
+                        type="button"
+                        onClick={() => scrollToIndex(idx)}
+                        aria-label={`Aller à ${it.key}`}
+                        className="dot"
+                        style={{
+                          width: on ? 18 : 8,
+                          height: 8,
+                          borderRadius: 999,
+                          background: on ? "#D4AF37" : "#232A36",
+                          border: on
+                            ? "none"
+                            : "1px solid rgba(212,175,55,0.25)",
+                          transition: "all 180ms ease",
+                        }}
+                      />
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
+            <style jsx>{`
+              /* Switch auto: si pas de hover (mobile/tablette) => carousel */
+              .desktopStep1 {
+                display: block;
+              }
+              .touchStep1 {
+                display: none;
+              }
+              @media (hover: none), (pointer: coarse) {
+                .desktopStep1 {
+                  display: none;
+                }
+                .touchStep1 {
+                  display: block;
+                }
+              }
+
+              /* Desktop strips */
+              .strip {
+                flex: 0 0 64px;
+              }
+              @media (min-width: 768px) {
+                .strip {
+                  flex-basis: 78px;
+                }
+              }
+              .strip:hover,
+              .strip:focus-visible {
+                flex: 1 0 520px;
+              }
+
+              .stripImg {
+                transform: scale(1.03);
+                transition: transform 420ms cubic-bezier(0.22, 0.61, 0.36, 1);
+              }
+
+              .stripOverlay {
+                position: absolute;
+                inset: 0;
+                background: linear-gradient(
+                  180deg,
+                  rgba(0, 0, 0, 0.72) 0%,
+                  rgba(0, 0, 0, 0.82) 60%,
+                  rgba(0, 0, 0, 0.9) 100%
+                );
+                opacity: 0.92;
+                transition: opacity 260ms ease;
+              }
+
+              .stripGlow {
+                position: absolute;
+                inset: 0;
+                background: radial-gradient(
+                  900px 500px at 35% 35%,
+                  rgba(212, 175, 55, 0.18) 0%,
+                  rgba(0, 0, 0, 0) 55%
+                );
+                opacity: 0;
+                transition: opacity 280ms ease;
+              }
+
+              .stripContent {
+                opacity: 0;
+                transform: translate3d(0, 10px, 0);
+                transition:
+                  opacity 240ms ease,
+                  transform 260ms ease;
+              }
+
+              .strip:hover .stripImg,
+              .strip:focus-visible .stripImg {
+                transform: scale(1.1);
+              }
+              .strip:hover .stripOverlay,
+              .strip:focus-visible .stripOverlay {
+                opacity: 0.55;
+              }
+              .strip:hover .stripGlow,
+              .strip:focus-visible .stripGlow {
+                opacity: 1;
+              }
+              .strip:hover .stripContent,
+              .strip:focus-visible .stripContent {
+                opacity: 1;
+                transform: translate3d(0, 0, 0);
+              }
+
+              /* Carousel */
+              .carousel {
+                display: flex;
+                gap: 12px;
+                overflow-x: auto;
+                padding: 8px;
+                scroll-snap-type: x mandatory;
+                scroll-padding-left: 18px;
+                scroll-padding-right: 18px;
+                -webkit-overflow-scrolling: touch;
+                overscroll-behavior-x: contain;
+                touch-action: pan-x;
+              }
+              .carousel::-webkit-scrollbar {
+                display: none;
+              }
+
+              .carouselCard {
+                scroll-snap-align: center;
+                flex: 0 0 84%;
+                height: 280px;
+                border-radius: 18px;
+              }
+
+              @media (min-width: 640px) {
+                .carouselCard {
+                  flex-basis: 62%;
+                }
+              }
+
+              @media (min-width: 768px) {
+                .carouselCard {
+                  flex-basis: 46%;
+                  height: 320px;
+                }
+              }
+
+              .carouselImg {
+                transform: scale(1.03);
+              }
+
+              .carouselOverlay {
+                position: absolute;
+                inset: 0;
+                background: linear-gradient(
+                  180deg,
+                  rgba(0, 0, 0, 0.35) 0%,
+                  rgba(0, 0, 0, 0.82) 70%,
+                  rgba(0, 0, 0, 0.92) 100%
+                );
+                opacity: 1;
+              }
+
+              .carouselGlow {
+                position: absolute;
+                inset: 0;
+                background: radial-gradient(
+                  700px 380px at 35% 35%,
+                  rgba(212, 175, 55, 0.18) 0%,
+                  rgba(0, 0, 0, 0) 55%
+                );
+                opacity: 1;
+              }
+
+              .edgeFade {
+                pointer-events: none;
+                position: absolute;
+                top: 0;
+                bottom: 0;
+                width: 48px;
+              }
+              .edgeFade.left {
+                left: 0;
+                background: linear-gradient(
+                  90deg,
+                  rgba(13, 16, 20, 1) 0%,
+                  rgba(13, 16, 20, 0) 100%
+                );
+              }
+              .edgeFade.right {
+                right: 0;
+                background: linear-gradient(
+                  270deg,
+                  rgba(13, 16, 20, 1) 0%,
+                  rgba(13, 16, 20, 0) 100%
+                );
+              }
+            `}</style>
 
             <div className="mt-10 flex justify-center">
               <button
@@ -452,7 +777,7 @@ export default function Reservations() {
             lastName={lastName}
             phone={phone}
             email={email}
-            emailLocked={emailLocked} // ✅ NEW
+            emailLocked={emailLocked}
             note={note}
             accept={accept}
             setFirstName={setFirstName}
@@ -720,7 +1045,7 @@ function Step3(props: {
   lastName: string;
   phone: string;
   email: string;
-  emailLocked: boolean; // ✅ NEW
+  emailLocked: boolean;
   note: string;
   accept: boolean;
   setFirstName: (v: string) => void;
@@ -835,7 +1160,6 @@ function Step3(props: {
                 placeholder="Ex: 06 12 34 56 78"
               />
 
-              {/* ✅ Email pré-rempli + lock si connecté */}
               <div>
                 <Field
                   label="Email"
@@ -919,7 +1243,7 @@ function Step3(props: {
                     first_name: firstName,
                     last_name: lastName,
                     phone,
-                    email, // ✅ si lock, c’est celui du compte
+                    email,
                     note,
                   };
 
@@ -977,7 +1301,6 @@ function Step3(props: {
             )}
           </div>
 
-          {/* Récap */}
           <div
             style={{
               borderRadius: 18,
@@ -1041,7 +1364,7 @@ function Field(props: {
   onChange: (v: string) => void;
   placeholder?: string;
   type?: string;
-  disabled?: boolean; // ✅ NEW
+  disabled?: boolean;
 }) {
   const { label, value, onChange, placeholder, type, disabled } = props;
 
