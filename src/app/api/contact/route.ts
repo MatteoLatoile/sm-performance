@@ -25,12 +25,15 @@ export async function POST(req: Request) {
     if (name.length < 2) {
       return NextResponse.json({ error: "Nom invalide" }, { status: 400 });
     }
+
     if (!isValidEmail(email)) {
       return NextResponse.json({ error: "Email invalide" }, { status: 400 });
     }
+
     if (subject.length < 2) {
       return NextResponse.json({ error: "Objet invalide" }, { status: 400 });
     }
+
     if (message.length < 10) {
       return NextResponse.json(
         { error: "Message trop court (10+ caractères)" },
@@ -38,15 +41,20 @@ export async function POST(req: Request) {
       );
     }
 
-    // 1) Save in local DB (Supabase service role)
+    // 1) Save in DB (Supabase service role)
     const admin = createAdminSupabase();
-    const { error: dbError } = await admin.from("contact_messages").insert({
-      name,
-      email,
-      subject,
-      message,
-      status: "new",
-    });
+
+    const { error: dbError } = await admin.from("contact_messages").insert(
+      [
+        {
+          name,
+          email,
+          subject,
+          message,
+          status: "new",
+        },
+      ] as any, // 👈 fix TypeScript Supabase (évite le type "never")
+    );
 
     if (dbError) {
       return NextResponse.json(
@@ -60,7 +68,7 @@ export async function POST(req: Request) {
       from: RESEND_FROM,
       to: RESEND_CONTACT_TO,
       subject: `📩 Contact — ${subject}`,
-      replyTo: email, // tu peux répondre direct au client
+      replyTo: email,
       text: [
         `Nouveau message (Contact)`,
         ``,
@@ -83,7 +91,7 @@ export async function POST(req: Request) {
       `,
     });
 
-    // 3) (Optionnel) Confirmation au client
+    // 3) Confirmation au client
     await resend.emails.send({
       from: RESEND_FROM,
       to: email,
