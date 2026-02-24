@@ -168,7 +168,7 @@ export default function DashboardClient(props: {
                     <Th>Heure</Th>
                     <Th>Status</Th>
                     <Th>Montant</Th>
-                    <Th></Th>
+                    <Th>Actions</Th>
                   </tr>
                 </thead>
 
@@ -285,7 +285,7 @@ export default function DashboardClient(props: {
                     <Th>Email</Th>
                     <Th>Objet</Th>
                     <Th>Message</Th>
-                    <Th></Th>
+                    <Th>Actions</Th>
                   </tr>
                 </thead>
 
