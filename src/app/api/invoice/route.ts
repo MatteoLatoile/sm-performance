@@ -34,10 +34,10 @@ function safeText(v: unknown) {
   return String(v ?? "").trim();
 }
 
-async function docToBuffer(doc: PDFDocument) {
+async function docToBuffer(doc: any) {
   const chunks: Buffer[] = [];
   return await new Promise<Buffer>((resolve, reject) => {
-    doc.on("data", (c) => chunks.push(c));
+    doc.on("data", (c: Buffer) => chunks.push(c));
     doc.on("end", () => resolve(Buffer.concat(chunks)));
     doc.on("error", reject);
   });
