@@ -281,8 +281,6 @@ export default async function UserPage() {
                 >
                   {resErr.message}
                   <br />
-                  👉 Si tu vois “permission denied” : applique la policy SQL que
-                  je t’ai donnée.
                 </div>
               </div>
             )}

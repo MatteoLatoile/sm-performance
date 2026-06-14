@@ -34,7 +34,6 @@ export async function GET(req: Request) {
 
     const reservationId = session.metadata?.reservation_id;
     if (!reservationId) {
-      // On peut afficher quand même, mais on ne touche pas la DB
       return NextResponse.json({
         ok: true,
         payload: {
@@ -54,7 +53,7 @@ export async function GET(req: Request) {
 
     const admin = createAdminSupabase();
 
-    // Update idempotent (refresh safe)
+    // refresh safe
     const { data, error } = await admin
       .from("reservations")
       .update({

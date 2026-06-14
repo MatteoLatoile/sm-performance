@@ -41,20 +41,17 @@ export async function POST(req: Request) {
       );
     }
 
-    // 1) Save in DB (Supabase service role)
     const admin = createAdminSupabase();
 
-    const { error: dbError } = await admin.from("contact_messages").insert(
-      [
-        {
-          name,
-          email,
-          subject,
-          message,
-          status: "new",
-        },
-      ] as any, // 👈 fix TypeScript Supabase (évite le type "never")
-    );
+    const { error: dbError } = await admin.from("contact_messages").insert([
+      {
+        name,
+        email,
+        subject,
+        message,
+        status: "new",
+      },
+    ] as any);
 
     if (dbError) {
       return NextResponse.json(

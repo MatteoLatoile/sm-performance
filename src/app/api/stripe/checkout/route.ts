@@ -71,7 +71,7 @@ export async function POST(req: Request) {
 
     const origin = getOrigin(req);
 
-    // ✅ Prix (ex 30€)
+    // Prix
     const amountInCents = 3000;
 
     // 1) LOCK créneau en DB (pending)
@@ -96,8 +96,6 @@ export async function POST(req: Request) {
       .single();
 
     if (insertErr) {
-      // Unique violation => créneau déjà pris
-      // (supabase renvoie souvent code "23505")
       const code = (insertErr as any).code;
       if (code === "23505") {
         return NextResponse.json(
